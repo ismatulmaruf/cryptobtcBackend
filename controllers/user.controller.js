@@ -15,10 +15,10 @@ const cookieOptions = {
 // Register
 const register = async (req, res, next) => {
   try {
-    const { fullName, email, password, phone, collage } = req.body;
+    const { fullName, email, password } = req.body;
 
     // Check if user misses any fields
-    if (!fullName || !email || !password || !phone || !collage) {
+    if (!fullName || !email || !password) {
       return next(new AppError("All fields are required", 400));
     }
 
@@ -33,8 +33,6 @@ const register = async (req, res, next) => {
       fullName,
       email,
       password,
-      phone,
-      collage,
     });
 
     if (!user) {
@@ -324,7 +322,7 @@ const changePassword = async (req, res, next) => {
 // update profile
 const updateUser = async (req, res, next) => {
   try {
-    const { fullName, collage, phone } = req.body;
+    const { fullName } = req.body;
     const { id } = req.user;
 
     // console.log(fullName);
@@ -337,12 +335,6 @@ const updateUser = async (req, res, next) => {
 
     if (fullName) {
       user.fullName = fullName;
-    }
-    if (phone) {
-      user.phone = phone;
-    }
-    if (collage) {
-      user.collage = collage;
     }
 
     await user.save();
