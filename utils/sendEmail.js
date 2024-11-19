@@ -1,10 +1,9 @@
 import nodemailer from "nodemailer";
 
-
 const sendEmail = async function (email, subject, message) {
-  // create reusable transporter object using the default SMTP transport 
+  // create reusable transporter object using the default SMTP transport
   let transporter = nodemailer.createTransport({
-    service: 'gmail',
+    service: "gmail",
     host: process.env.SMTP_HOST,
     port: process.env.SMTP_PORT,
     secure: false,
@@ -16,7 +15,7 @@ const sendEmail = async function (email, subject, message) {
 
   // send mail with defined transport object
   await transporter.sendMail({
-    from: `LMS Skills <${process.env.SMTP_FROM_EMAIL}>`, // sender address
+    from: `Crypto BTC <${process.env.SMTP_FROM_EMAIL}>`, // sender address
     to: email, // user email
     subject: subject, // Subject line
     text: message, // html body
