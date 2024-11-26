@@ -15,10 +15,10 @@ const cookieOptions = {
 // Register
 const register = async (req, res, next) => {
   try {
-    const { fullName, email, password } = req.body;
+    const { fullName, email, password, phone } = req.body;
 
     // Check if user misses any fields
-    if (!fullName || !email || !password) {
+    if (!fullName || !email || !password || !phone) {
       return next(new AppError("All fields are required", 400));
     }
 
@@ -33,6 +33,7 @@ const register = async (req, res, next) => {
       fullName,
       email,
       password,
+      phone,
     });
 
     if (!user) {
@@ -122,6 +123,28 @@ const getProfile = async (req, res) => {
     });
   } catch (e) {
     return next(new AppError("Failed to fetch user profile", 500));
+  }
+};
+
+const getPoint = async (req, res, next) => {
+  try {
+    const { id } = req.user;
+    const user = await userModel.findById(id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "User point details",
+      point: user.point, // Return only the point
+    });
+  } catch (e) {
+    return next(new AppError("Failed to fetch user point", 500));
   }
 };
 
@@ -323,6 +346,7 @@ const changePassword = async (req, res, next) => {
 const updateUser = async (req, res, next) => {
   try {
     const { fullName } = req.body;
+    const { phone } = req.body;
     const { id } = req.user;
 
     // console.log(fullName);
@@ -335,6 +359,9 @@ const updateUser = async (req, res, next) => {
 
     if (fullName) {
       user.fullName = fullName;
+    }
+    if (phone) {
+      user.phone = phone;
     }
 
     await user.save();
@@ -413,4 +440,5 @@ export {
   makeAdorIN,
   deleteUserAdmin,
   getAllUserswithResult,
+  getPoint,
 };

@@ -16,6 +16,7 @@ import {
   removeSubscription,
   deleteUserAdmin,
   getAllUserswithResult,
+  getPoint,
 } from "../controllers/user.controller.js";
 import { authorisedRoles, isLoggedIn } from "../middleware/auth.middleware.js";
 
@@ -23,6 +24,7 @@ router.post("/register", register);
 router.post("/login", login);
 router.get("/logout", logout);
 router.get("/me", isLoggedIn, getProfile);
+router.get("/point", isLoggedIn, getPoint);
 router.get(
   "/all",
   isLoggedIn,

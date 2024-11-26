@@ -26,11 +26,6 @@ const userSchema = new Schema(
       minLength: [4, "Password must be at least 4 character"],
       select: false,
     },
-    subscribe: {
-      type: [mongoose.Schema.Types.ObjectId], // Array of ObjectId references
-      ref: "Exam", // Reference to the Exam model
-      default: [], // Initialize as an empty array
-    },
     avatar: {
       public_id: {
         type: String,
@@ -44,27 +39,16 @@ const userSchema = new Schema(
       default: "USER",
       enum: ["USER", "ADMIN", "INSTRUCTOR"],
     },
+    point: {
+      type: Number,
+      default: 0,
+    },
+    phone: {
+      type: String,
+      required: [true, "phone is required"],
+    },
     forgotPasswordToken: String,
     forgotPasswordExpiry: Date,
-    subscription: {
-      id: String,
-      status: String,
-    },
-    examResults: [
-      {
-        examId: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Exam",
-          required: true,
-        },
-        score: { type: Number, required: true },
-        incorrectAnswersCount: { type: Number },
-        totalQuestions: { type: Number, required: true },
-        percentage: { type: Number, required: true },
-        submittedAnswers: { type: Map, of: String, required: true }, // Store answers with question ID as key
-        dateSubmitted: { type: Date, default: Date.now },
-      },
-    ],
   },
   {
     timestamps: true,
