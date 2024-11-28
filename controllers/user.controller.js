@@ -13,9 +13,63 @@ const cookieOptions = {
 };
 
 // Register
+// const register = async (req, res, next) => {
+//   try {
+//     const { fullName, email, password, phone, refer } = req.body;
+
+//     console.log(refer);
+
+//     // Check if user misses any fields
+//     if (!fullName || !email || !password || !phone) {
+//       return next(new AppError("All fields are required", 400));
+//     }
+
+//     // Check if the user already exists
+//     const userExist = await userModel.findOne({ email });
+//     if (userExist) {
+//       return next(new AppError("Email already exists, please login", 400));
+//     }
+
+//     // Save user in the database and log the user in
+//     const user = await userModel.create({
+//       fullName,
+//       email,
+//       password,
+//       phone,
+//     });
+
+//     if (!user) {
+//       return next(
+//         new AppError("User registration failed, please try again", 400)
+//       );
+//     }
+
+//     await user.save();
+
+//     user.password = undefined;
+
+//     const token = await user.generateJWTToken();
+
+//     res.cookie("token", token, cookieOptions);
+
+//     res.status(201).json({
+//       success: true,
+//       message: "User registered successfully",
+//       user,
+//     });
+//   } catch (e) {
+//     return next(new AppError(e.message, 500));
+//   }
+// };
+
+// login
+
 const register = async (req, res, next) => {
   try {
-    const { fullName, email, password, phone } = req.body;
+    const { fullName, email, password, phone, refer } = req.body;
+
+    // Log referral code for debugging
+    console.log("Referral Code:", refer);
 
     // Check if user misses any fields
     if (!fullName || !email || !password || !phone) {
@@ -28,7 +82,7 @@ const register = async (req, res, next) => {
       return next(new AppError("Email already exists, please login", 400));
     }
 
-    // Save user in the database and log the user in
+    // Save user in the database
     const user = await userModel.create({
       fullName,
       email,
@@ -42,25 +96,42 @@ const register = async (req, res, next) => {
       );
     }
 
+    // Find the user associated with the referral code (first part of email)
+    if (refer) {
+      const referredUser = await userModel.findOne({
+        email: { $regex: `^${refer}@`, $options: "i" }, // Case-insensitive regex
+      });
+
+      if (referredUser) {
+        referredUser.point = (referredUser.point || 0) + 10; // Add 10 point
+        await referredUser.save(); // Save the updated point
+      }
+    }
+
+    // Save the newly registered user
     await user.save();
 
+    // Remove the password field from the user object
     user.password = undefined;
 
+    // Generate a JWT token for the user
     const token = await user.generateJWTToken();
 
+    // Set the token in a cookie
     res.cookie("token", token, cookieOptions);
 
+    // Respond with success
     res.status(201).json({
       success: true,
       message: "User registered successfully",
       user,
     });
   } catch (e) {
+    // Handle errors
     return next(new AppError(e.message, 500));
   }
 };
 
-// login
 const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
