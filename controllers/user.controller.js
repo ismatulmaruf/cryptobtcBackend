@@ -103,7 +103,7 @@ const register = async (req, res, next) => {
       });
 
       if (referredUser) {
-        referredUser.point = (referredUser.point || 0) + 10; // Add 10 point
+        referredUser.point = (referredUser.point || 0) + 1; // Add 10 point
         await referredUser.save(); // Save the updated point
       }
     }
