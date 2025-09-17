@@ -25,28 +25,23 @@ router.post("/login", login);
 router.get("/logout", logout);
 router.get("/me", isLoggedIn, getProfile);
 router.get("/point", isLoggedIn, getPoint);
-router.get(
-  "/all",
-  isLoggedIn,
-  authorisedRoles("ADMIN", "INSTRUCTOR"),
-  getAllUsers
-);
+router.get("/all", isLoggedIn, authorisedRoles("ADMIN", "SADMIN"), getAllUsers);
 router.get(
   "/allwithresult",
   isLoggedIn,
-  authorisedRoles("ADMIN", "INSTRUCTOR"),
+  authorisedRoles("ADMIN", "SADMIN"),
   getAllUserswithResult
 );
 router.post(
   "/addsubscription/:userId",
   isLoggedIn,
-  authorisedRoles("ADMIN", "INSTRUCTOR"),
+  authorisedRoles("ADMIN", "SADMIN"),
   addSubscription
 );
 router.delete(
   "/addsubscription/:userId",
   isLoggedIn,
-  authorisedRoles("ADMIN", "INSTRUCTOR"),
+  authorisedRoles("ADMIN", "SADMIN"),
   removeSubscription
 );
 
@@ -58,14 +53,14 @@ router.post("/update/:id", isLoggedIn, updateUser);
 router.put(
   "/:id/update-role",
   isLoggedIn,
-  authorisedRoles("ADMIN"),
+  authorisedRoles("ADMIN", "SADMIN"),
   makeAdorIN
 );
 
 router.delete(
   "/:id/delete-user",
   isLoggedIn,
-  authorisedRoles("ADMIN"),
+  authorisedRoles("ADMIN", "SADMIN"),
   deleteUserAdmin
 );
 

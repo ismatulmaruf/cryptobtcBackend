@@ -39,9 +39,22 @@ const userSchema = new Schema(
       default: "USER",
       enum: ["USER", "ADMIN", "INSTRUCTOR"],
     },
+    watchedVideos: [
+      {
+        video: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Video",
+        },
+        milestones: [Number], // e.g., [25, 50, 75, 100]
+      },
+    ],
     point: {
       type: Number,
       default: 0,
+    },
+    subscription: {
+      type: Boolean,
+      default: false,
     },
     phone: {
       type: String,

@@ -8,6 +8,8 @@ import userPoint from "./routes/userPoint.routes.js";
 import adPoint from "./routes/adminPoint.routes.js";
 import deposit from "./routes/deposit.routes.js";
 import withdraw from "./routes/withdraw.routes.js";
+import subscriptionRoutes from "./routes/subscription.routes.js";
+import videoRoutes from "./routes/video.routes.js";
 import miscellaneousRoutes from "./routes/miscellaneous.routes.js";
 import express from "express";
 import connectToDb from "./config/db.config.js";
@@ -36,6 +38,8 @@ app.use("/api/v1/point", userPoint);
 app.use("/api/v1/adpoint", adPoint);
 app.use("/api/v1/deposit", deposit);
 app.use("/api/v1/withdraw", withdraw);
+app.use("/api/v1/subscription", subscriptionRoutes);
+app.use("/api/v1/video", videoRoutes);
 app.use("/api/v1/", miscellaneousRoutes);
 
 app.all("*", (req, res) => {

@@ -71,7 +71,7 @@ const authorizeSubscriber = async (req, res, next) => {
     // If the user is an admin or is subscribed to the exam, grant access
     if (
       role === "ADMIN" ||
-      role === "INSTRUCTOR" ||
+      role === "SADMIN" ||
       user.subscribe.includes(catId)
     ) {
       return next();
