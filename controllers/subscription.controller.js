@@ -213,12 +213,10 @@ const deleteVideo = async (req, res, next) => {
 // Track video watch progress and award points
 const trackVideoProgress = async (req, res, next) => {
   try {
-    const { videoId, progress, point } = req.body;
+    const { videoId, point } = req.body;
 
-    if (!videoId || !progress || !point) {
-      return next(
-        new AppError("Video ID, progress, and point are required", 400)
-      );
+    if (!videoId || !point) {
+      return next(new AppError("Video ID and point are required", 400));
     }
 
     const user = await User.findById(req.user.id);
@@ -228,24 +226,14 @@ const trackVideoProgress = async (req, res, next) => {
       return next(new AppError("User or video not found", 404));
     }
 
-    // Update the user's watchedVideos array and points in one atomic operation
-    const updatedUser = await User.findOneAndUpdate(
-      { _id: user.id, "watchedVideos.video": videoId },
-      {
-        $push: { "watchedVideos.$.milestones": progress },
-        $inc: { point: point },
-      },
-      { new: true }
-    );
-
-    if (!updatedUser) {
-      return next(new AppError("Failed to update video progress", 400));
-    }
+    // Just add points to user
+    user.point += point;
+    await user.save();
 
     return res.status(200).json({
       success: true,
-      message: `Awarded ${point} points for watching ${progress}%`,
-      totalPoints: updatedUser.point,
+      message: `✅ Awarded ${point} points`,
+      totalPoints: user.point,
     });
   } catch (error) {
     console.error("Error tracking video progress:", error);

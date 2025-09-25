@@ -9,7 +9,7 @@ import { isLoggedIn, authorisedRoles } from "../middleware/auth.middleware.js";
 const router = Router();
 
 // Route to add unique code
-router.post("/add-code", isLoggedIn, authorisedRoles("SADMIN"), addUniqueCode);
+router.post("/add-code", isLoggedIn, authorisedRoles("ADMIN"), addUniqueCode);
 
 // Route to get all generated codes (for ADMIN)
 router.get(
