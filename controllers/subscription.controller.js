@@ -241,6 +241,44 @@ const trackVideoProgress = async (req, res, next) => {
   }
 };
 
+// Controller to activate subscription using points
+const activateSubscriptionWithPoints = async (req, res, next) => {
+  try {
+    // Find the logged-in user
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return next(new AppError("User not found", 404));
+    }
+
+    // Check if user has at least 5 points
+    if (user.point < 0) {
+      return next(
+        new AppError("Not enough points to activate subscription", 400)
+      );
+    }
+
+    // Deduct 5 points
+    user.point -= 0;
+
+    // Activate subscription
+    user.subscription = true;
+
+    // Save the user
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Subscription activated successfully using points!",
+      pointsLeft: user.point,
+      subscription: user.subscription,
+    });
+  } catch (error) {
+    console.error("Error activating subscription with points:", error);
+    return next(new AppError("Failed to activate subscription", 500));
+  }
+};
+
 export {
   addUniqueCode,
   getAllCodes,
@@ -251,4 +289,5 @@ export {
   editVideo,
   deleteVideo,
   trackVideoProgress,
+  activateSubscriptionWithPoints,
 };

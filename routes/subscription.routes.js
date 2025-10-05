@@ -3,6 +3,7 @@ import {
   addUniqueCode,
   getAllCodes,
   applySubscriptionCode,
+  activateSubscriptionWithPoints, // import your new controller
 } from "../controllers/subscription.controller.js";
 import { isLoggedIn, authorisedRoles } from "../middleware/auth.middleware.js";
 
@@ -20,10 +21,13 @@ router.get(
 );
 
 // Route to apply a subscription code
+router.post("/apply-code", isLoggedIn, applySubscriptionCode);
+
+// Route to activate subscription using points
 router.post(
-  "/apply-code",
+  "/activate-with-points",
   isLoggedIn, // Ensure the user is logged in
-  applySubscriptionCode
+  activateSubscriptionWithPoints
 );
 
 export default router;
