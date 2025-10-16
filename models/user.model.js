@@ -46,8 +46,13 @@ const userSchema = new Schema(
           ref: "Video",
         },
         milestones: [Number], // e.g., [25, 50, 75, 100]
+        watchedAt: {
+          type: Date,
+          default: Date.now,
+        },
       },
     ],
+
     point: {
       type: Number,
       default: 0,

@@ -226,13 +226,34 @@ const trackVideoProgress = async (req, res, next) => {
       return next(new AppError("User or video not found", 404));
     }
 
-    // Just add points to user
+    // Check if video was already watched today
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // start of today
+
+    const alreadyWatchedToday = user.watchedVideos.some((item) => {
+      return (
+        item.video.toString() === videoId.toString() &&
+        new Date(item.watchedAt) >= today
+      );
+    });
+
+    if (alreadyWatchedToday) {
+      return res.status(200).json({
+        success: false,
+        message:
+          "You’ve already watched this video today — no extra points this time! 😊",
+        totalPoints: user.point,
+      });
+    }
+
+    // Otherwise add points and record watch
     user.point += point;
+    user.watchedVideos.push({ video: videoId, watchedAt: new Date() });
     await user.save();
 
     return res.status(200).json({
       success: true,
-      message: `✅ Awarded ${point} points`,
+      message: `🎉 Great progress! You've earned ${point} points for watching this video.`,
       totalPoints: user.point,
     });
   } catch (error) {

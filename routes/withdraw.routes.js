@@ -6,6 +6,7 @@ import {
   updateWithdrawStatus,
   deleteWithdrawForm,
   getAllWithdrawals,
+  getMyWithdrawals,
 } from "../controllers/withdraw.controller.js";
 import { authorisedRoles, isLoggedIn } from "../middleware/auth.middleware.js";
 
@@ -29,5 +30,8 @@ router.delete(
   authorisedRoles("ADMIN", "SADMIN"),
   deleteWithdrawForm
 ); // Delete deposit form
+
+// User withdrawal history
+router.get("/my-withdrawals", isLoggedIn, getMyWithdrawals);
 
 export default router;

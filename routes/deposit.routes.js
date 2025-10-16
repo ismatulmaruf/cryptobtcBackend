@@ -6,6 +6,7 @@ import {
   updateDepositStatus,
   deleteDepositForm,
   getAllDeposits,
+  getUserDeposits,
 } from "../controllers/deposit.controller.js";
 import { authorisedRoles, isLoggedIn } from "../middleware/auth.middleware.js";
 
@@ -29,5 +30,7 @@ router.delete(
   authorisedRoles("ADMIN", "SADMIN"),
   deleteDepositForm
 ); // Delete deposit form
+
+router.get("/my-deposits", isLoggedIn, getUserDeposits);
 
 export default router;

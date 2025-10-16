@@ -150,9 +150,32 @@ const updateWithdrawStatus = async (req, res, next) => {
   }
 };
 
+// Get all withdrawals for logged-in user
+const getMyWithdrawals = async (req, res, next) => {
+  try {
+    const email = req.user.email;
+
+    if (!email) {
+      return next(new AppError("User email not found", 400));
+    }
+
+    const withdrawals = await Withdraw.find({ email }).sort("-createdAt");
+
+    res.status(200).json({
+      success: true,
+      message: "Your withdrawal history retrieved successfully",
+      withdrawals,
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("Failed to retrieve withdrawal history", 500));
+  }
+};
+
 export {
   withdrawFormSubmit,
   deleteWithdrawForm,
   updateWithdrawStatus,
   getAllWithdrawals,
+  getMyWithdrawals,
 };

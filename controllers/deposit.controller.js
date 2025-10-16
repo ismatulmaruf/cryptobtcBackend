@@ -122,9 +122,32 @@ const updateDepositStatus = async (req, res, next) => {
   }
 };
 
+const getUserDeposits = async (req, res, next) => {
+  try {
+    const email = req.user.email; // Logged-in user email
+
+    if (!email) {
+      return next(new AppError("User email not found", 400));
+    }
+
+    // Find all deposits by this user
+    const deposits = await Deposit.find({ email }).sort("-createdAt");
+
+    res.status(200).json({
+      success: true,
+      message: "Your deposit history retrieved successfully",
+      deposits,
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("Failed to retrieve your deposit history", 500));
+  }
+};
+
 export {
   depositFormSubmit,
   deleteDepositForm,
   updateDepositStatus,
   getAllDeposits,
+  getUserDeposits,
 };
