@@ -4,17 +4,12 @@ import AppError from "../utils/error.utils.js";
 const addPoint = async (req, res, next) => {
   try {
     let { email, points } = req.body;
-
     points = Number(points);
 
-    console.log(points);
-
-    // Check if email and points are provided
     if (!email || points === undefined) {
       return next(new AppError("Both email and points are required", 400));
     }
 
-    // Validate points input
     if (typeof points !== "number" || points <= 0) {
       return next(new AppError("Points must be a positive number", 400));
     }
@@ -25,10 +20,27 @@ const addPoint = async (req, res, next) => {
       return next(new AppError("User not found", 404));
     }
 
+    // Check if this is the first deposit
+    const isFirstDeposit = user.point === 0;
+
     // Update user points
     user.point += points;
 
-    // Save changes to the database
+    // --- Handle referral point for referrer on first deposit ---
+    if (isFirstDeposit && user.referredBy && !user.referredPointsAdded) {
+      const referrer = await userModel.findOne({
+        email: { $regex: `^${user.referredBy}@`, $options: "i" },
+      });
+
+      if (referrer) {
+        referrer.point = (referrer.point || 0) + 1; // add 1 point to referrer
+        await referrer.save();
+
+        // Mark that referral points have been added
+        user.referredPointsAdded = true;
+      }
+    }
+
     await user.save();
 
     res.status(200).json({

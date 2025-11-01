@@ -34,6 +34,17 @@ const userSchema = new Schema(
         type: String,
       },
     },
+    // Add to your userSchema
+    referredBy: {
+      type: String, // store the identifier of the user who referred this user (email first part or username)
+      default: null,
+    },
+
+    referredPointsAdded: {
+      type: Boolean, // true if points have already been added to the referrer
+      default: false,
+    },
+
     role: {
       type: String,
       default: "USER",

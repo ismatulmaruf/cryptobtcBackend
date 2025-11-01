@@ -88,6 +88,7 @@ const register = async (req, res, next) => {
       email,
       password,
       phone,
+      referredBy: refer,
     });
 
     if (!user) {
@@ -97,16 +98,16 @@ const register = async (req, res, next) => {
     }
 
     // Find the user associated with the referral code (first part of email)
-    if (refer) {
-      const referredUser = await userModel.findOne({
-        email: { $regex: `^${refer}@`, $options: "i" }, // Case-insensitive regex
-      });
+    // if (refer) {
+    //   const referredUser = await userModel.findOne({
+    //     email: { $regex: `^${refer}@`, $options: "i" }, // Case-insensitive regex
+    //   });
 
-      if (referredUser) {
-        referredUser.point = (referredUser.point || 0) + 1; // Add 10 point
-        await referredUser.save(); // Save the updated point
-      }
-    }
+    //   if (referredUser) {
+    //     referredUser.point = (referredUser.point || 0) + 1; // Add 10 point
+    //     await referredUser.save(); // Save the updated point
+    //   }
+    // }
 
     // Save the newly registered user
     await user.save();

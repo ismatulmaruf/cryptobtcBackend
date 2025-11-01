@@ -209,7 +209,6 @@ const deleteVideo = async (req, res, next) => {
     return next(new AppError("Failed to delete video", 500));
   }
 };
-
 // Track video watch progress and award points
 const trackVideoProgress = async (req, res, next) => {
   try {
@@ -224,6 +223,16 @@ const trackVideoProgress = async (req, res, next) => {
 
     if (!user || !video) {
       return next(new AppError("User or video not found", 404));
+    }
+
+    // Check if user has at least 12 points to be eligible for video points
+    if (user.point < 12) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "You need at least 12 points to earn points from watching videos.",
+        totalPoints: user.point,
+      });
     }
 
     // Check if video was already watched today
@@ -272,17 +281,17 @@ const activateSubscriptionWithPoints = async (req, res, next) => {
       return next(new AppError("User not found", 404));
     }
 
-    // Check if user has at least 5 points
-    if (user.point < 0) {
+    // Check if user has at least 12 points
+    if (user.point < 12) {
       return next(
-        new AppError("Not enough points to activate subscription", 400)
+        new AppError(
+          "Not enough points to activate subscription. Please deposit at least 12 points to activate subscription.",
+          400
+        )
       );
     }
 
-    // Deduct 5 points
-    user.point -= 0;
-
-    // Activate subscription
+    // Activate subscription (subscription is free)
     user.subscription = true;
 
     // Save the user
@@ -290,8 +299,9 @@ const activateSubscriptionWithPoints = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message: "Subscription activated successfully using points!",
-      pointsLeft: user.point,
+      message:
+        "Subscription activated successfully! You can now access all features.",
+      pointsAvailable: user.point,
       subscription: user.subscription,
     });
   } catch (error) {
