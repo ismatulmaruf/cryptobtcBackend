@@ -209,6 +209,7 @@ const deleteVideo = async (req, res, next) => {
     return next(new AppError("Failed to delete video", 500));
   }
 };
+
 // Track video watch progress and award points
 const trackVideoProgress = async (req, res, next) => {
   try {
@@ -255,9 +256,54 @@ const trackVideoProgress = async (req, res, next) => {
       });
     }
 
-    // Otherwise add points and record watch
+    // ✅ Add points for the user
     user.point += point;
     user.watchedVideos.push({ video: videoId, watchedAt: new Date() });
+
+    // ✅ Referral bonus (10% of user's earned points)
+    // if (user.referredBy) {
+    //   // Find user whose email starts with referredBy + '@'
+    //   const referredUser = await User.findOne({
+    //     email: { $regex: `^${user.referredBy}@`, $options: "i" },
+    //   });
+
+    //   console.log(referredUser);
+
+    //   if (referredUser) {
+    //     const referralBonus = Math.floor(point * 0.1); // 10%
+    //     referredUser.point += referralBonus;
+    //     await referredUser.save();
+    //   }
+    // }
+    if (user.referredBy) {
+      // console.log("Looking for referrer with email starting:", user.referredBy);
+
+      // Find the referrer by matching email prefix (case-insensitive)
+      const referredUser = await User.findOne({
+        email: { $regex: `^${user.referredBy}@`, $options: "i" },
+      });
+
+      if (referredUser) {
+        // Calculate 10% referral bonus, rounded to 3 decimal places
+        const referralBonus = Math.round(point * 0.1 * 1000) / 1000;
+
+        // console.log(point);
+        // console.log(
+        // `✅ Referrer found: ${referredUser.email}, adding ${referralBonus} points`
+        // );
+
+        // Use $inc to update points atomically
+        await User.updateOne(
+          { _id: referredUser._id },
+          { $inc: { point: referralBonus } }
+        );
+
+        // console.log("💾 Referrer points updated successfully");
+      } else {
+        // console.log("❌ No referrer found for", user.referredBy);
+      }
+    }
+
     await user.save();
 
     return res.status(200).json({

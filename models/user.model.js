@@ -63,11 +63,12 @@ const userSchema = new Schema(
         },
       },
     ],
-
     point: {
       type: Number,
       default: 0,
+      set: (v) => Math.round(v * 1000) / 1000, // rounds to 2 decimals
     },
+
     subscription: {
       type: Boolean,
       default: false,
