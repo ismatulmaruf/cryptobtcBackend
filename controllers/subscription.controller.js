@@ -211,6 +211,157 @@ const deleteVideo = async (req, res, next) => {
 };
 
 // Track video watch progress and award points
+// const trackVideoProgress = async (req, res, next) => {
+//   try {
+//     const { videoId, point } = req.body;
+
+//     if (!videoId || !point) {
+//       return next(new AppError("Video ID and point are required", 400));
+//     }
+
+//     const user = await User.findById(req.user.id);
+//     const video = await Video.findById(videoId);
+
+//     if (!user || !video) {
+//       return next(new AppError("User or video not found", 404));
+//     }
+
+//     // Check if user has at least 12 points to be eligible for video points
+//     if (user.point < 12) {
+//       return res.status(400).json({
+//         success: false,
+//         message:
+//           "You need at least 12 points to earn points from watching videos.",
+//         totalPoints: user.point,
+//       });
+//     }
+
+//     // Check if video was already watched today
+//     const today = new Date();
+//     today.setHours(0, 0, 0, 0); // start of today
+
+//     const alreadyWatchedToday = user.watchedVideos.some((item) => {
+//       return (
+//         item.video.toString() === videoId.toString() &&
+//         new Date(item.watchedAt) >= today
+//       );
+//     });
+
+//     if (alreadyWatchedToday) {
+//       return res.status(200).json({
+//         success: false,
+//         message:
+//           "You’ve already watched this video today — no extra points this time! 😊",
+//         totalPoints: user.point,
+//       });
+//     }
+
+//     // ✅ Add points for the user
+//     user.point += point;
+//     user.watchedVideos.push({ video: videoId, watchedAt: new Date() });
+
+//     // ✅ Referral bonus (10% of user's earned points)
+//     // if (user.referredBy) {
+//     //   // Find user whose email starts with referredBy + '@'
+//     //   const referredUser = await User.findOne({
+//     //     email: { $regex: `^${user.referredBy}@`, $options: "i" },
+//     //   });
+
+//     //   console.log(referredUser);
+
+//     //   if (referredUser) {
+//     //     const referralBonus = Math.floor(point * 0.1); // 10%
+//     //     referredUser.point += referralBonus;
+//     //     await referredUser.save();
+//     //   }
+//     // }
+
+//     // if (user.referredBy) {
+//     //   // console.log("Looking for referrer with email starting:", user.referredBy);
+
+//     //   // Find the referrer by matching email prefix (case-insensitive)
+//     //   const referredUser = await User.findOne({
+//     //     email: { $regex: `^${user.referredBy}@`, $options: "i" },
+//     //   });
+
+//     //   if (referredUser) {
+//     //     // Calculate 10% referral bonus, rounded to 3 decimal places
+//     //     const referralBonus = Math.round(point * 0.1 * 1000) / 1000;
+
+//     //     // console.log(point);
+//     //     // console.log(
+//     //     // `✅ Referrer found: ${referredUser.email}, adding ${referralBonus} points`
+//     //     // );
+
+//     //     // Use $inc to update points atomically
+//     //     await User.updateOne(
+//     //       { _id: referredUser._id },
+//     //       { $inc: { point: referralBonus } }
+//     //     );
+
+//     //     // console.log("💾 Referrer points updated successfully");
+//     //   } else {
+//     //     // console.log("❌ No referrer found for", user.referredBy);
+//     //   }
+//     // }
+
+//     // ✅ Referral bonus system (3 levels: father, grandfather, great-grandfather)
+//     if (user.referredBy) {
+//       // Helper function to find user by referredBy prefix
+//       const findReferrer = async (referredByPrefix) => {
+//         return await User.findOne({
+//           email: { $regex: `^${referredByPrefix}@`, $options: "i" },
+//         });
+//       };
+
+//       // Level 1: Father (direct referrer)
+//       const level1 = await findReferrer(user.referredBy);
+//       if (level1) {
+//         const level1Bonus = Math.round(point * 0.1 * 1000) / 1000;
+//         await User.updateOne(
+//           { _id: level1._id },
+//           { $inc: { point: level1Bonus } }
+//         );
+
+//         // Level 2: Grandfather (referrer of level1)
+//         if (level1.referredBy) {
+//           const level2 = await findReferrer(level1.referredBy);
+//           if (level2) {
+//             const level2Bonus = Math.round(point * 0.05 * 1000) / 1000;
+//             await User.updateOne(
+//               { _id: level2._id },
+//               { $inc: { point: level2Bonus } }
+//             );
+
+//             // Level 3: Great-grandfather (referrer of level2)
+//             if (level2.referredBy) {
+//               const level3 = await findReferrer(level2.referredBy);
+//               if (level3) {
+//                 const level3Bonus = Math.round(point * 0.03 * 1000) / 1000;
+//                 await User.updateOne(
+//                   { _id: level3._id },
+//                   { $inc: { point: level3Bonus } }
+//                 );
+//               }
+//             }
+//           }
+//         }
+//       }
+//     }
+
+//     await user.save();
+
+//     return res.status(200).json({
+//       success: true,
+//       message: `🎉 Great progress! You've earned ${point} points for watching this video.`,
+//       totalPoints: user.point,
+//     });
+//   } catch (error) {
+//     console.error("Error tracking video progress:", error);
+//     return next(new AppError("Failed to track video progress", 500));
+//   }
+// };
+
 const trackVideoProgress = async (req, res, next) => {
   try {
     const { videoId, point } = req.body;
@@ -226,7 +377,7 @@ const trackVideoProgress = async (req, res, next) => {
       return next(new AppError("User or video not found", 404));
     }
 
-    // Check if user has at least 12 points to be eligible for video points
+    // Check if user has at least 12 points
     if (user.point < 12) {
       return res.status(400).json({
         success: false,
@@ -236,18 +387,31 @@ const trackVideoProgress = async (req, res, next) => {
       });
     }
 
-    // Check if video was already watched today
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // start of today
+    today.setHours(0, 0, 0, 0);
 
-    const alreadyWatchedToday = user.watchedVideos.some((item) => {
-      return (
-        item.video.toString() === videoId.toString() &&
-        new Date(item.watchedAt) >= today
-      );
-    });
+    // ✅ Try atomic update: only update if not watched today
+    const updatedUser = await User.findOneAndUpdate(
+      {
+        _id: user._id,
+        watchedVideos: {
+          $not: {
+            $elemMatch: {
+              video: videoId,
+              watchedAt: { $gte: today },
+            },
+          },
+        },
+      },
+      {
+        $inc: { point: point },
+        $push: { watchedVideos: { video: videoId, watchedAt: new Date() } },
+      },
+      { new: true } // return updated user
+    );
 
-    if (alreadyWatchedToday) {
+    // If updatedUser is null, means already watched today
+    if (!updatedUser) {
       return res.status(200).json({
         success: false,
         message:
@@ -256,60 +420,53 @@ const trackVideoProgress = async (req, res, next) => {
       });
     }
 
-    // ✅ Add points for the user
-    user.point += point;
-    user.watchedVideos.push({ video: videoId, watchedAt: new Date() });
-
-    // ✅ Referral bonus (10% of user's earned points)
-    // if (user.referredBy) {
-    //   // Find user whose email starts with referredBy + '@'
-    //   const referredUser = await User.findOne({
-    //     email: { $regex: `^${user.referredBy}@`, $options: "i" },
-    //   });
-
-    //   console.log(referredUser);
-
-    //   if (referredUser) {
-    //     const referralBonus = Math.floor(point * 0.1); // 10%
-    //     referredUser.point += referralBonus;
-    //     await referredUser.save();
-    //   }
-    // }
-    if (user.referredBy) {
-      // console.log("Looking for referrer with email starting:", user.referredBy);
-
-      // Find the referrer by matching email prefix (case-insensitive)
-      const referredUser = await User.findOne({
-        email: { $regex: `^${user.referredBy}@`, $options: "i" },
+    // ✅ Referral bonus system (3 levels)
+    const findReferrer = async (prefix) => {
+      return await User.findOne({
+        email: { $regex: `^${prefix}@`, $options: "i" },
       });
+    };
 
-      if (referredUser) {
-        // Calculate 10% referral bonus, rounded to 3 decimal places
-        const referralBonus = Math.round(point * 0.1 * 1000) / 1000;
-
-        // console.log(point);
-        // console.log(
-        // `✅ Referrer found: ${referredUser.email}, adding ${referralBonus} points`
-        // );
-
-        // Use $inc to update points atomically
+    if (user.referredBy) {
+      const level1 = await findReferrer(user.referredBy);
+      if (level1) {
+        const level1Bonus = Math.round(point * 0.1 * 1000) / 1000;
         await User.updateOne(
-          { _id: referredUser._id },
-          { $inc: { point: referralBonus } }
+          { _id: level1._id },
+          { $inc: { point: level1Bonus } }
         );
 
-        // console.log("💾 Referrer points updated successfully");
-      } else {
-        // console.log("❌ No referrer found for", user.referredBy);
+        // console.log(level1);
+
+        if (level1.referredBy) {
+          // console.log(level1.referredBy);
+          const level2 = await findReferrer(level1.referredBy);
+          if (level2) {
+            const level2Bonus = Math.round(point * 0.05 * 1000) / 1000;
+            await User.updateOne(
+              { _id: level2._id },
+              { $inc: { point: level2Bonus } }
+            );
+
+            if (level2.referredBy) {
+              const level3 = await findReferrer(level2.referredBy);
+              if (level3) {
+                const level3Bonus = Math.round(point * 0.03 * 1000) / 1000;
+                await User.updateOne(
+                  { _id: level3._id },
+                  { $inc: { point: level3Bonus } }
+                );
+              }
+            }
+          }
+        }
       }
     }
-
-    await user.save();
 
     return res.status(200).json({
       success: true,
       message: `🎉 Great progress! You've earned ${point} points for watching this video.`,
-      totalPoints: user.point,
+      totalPoints: updatedUser.point,
     });
   } catch (error) {
     console.error("Error tracking video progress:", error);

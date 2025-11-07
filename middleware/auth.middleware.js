@@ -12,6 +12,7 @@ const isLoggedIn = async (req, res, next) => {
 
   const userDetails = await jwt.verify(token, process.env.JWT_SECRET);
   req.user = userDetails;
+  // console.log(userDetails);
 
   next();
 };
